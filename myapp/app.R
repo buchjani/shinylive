@@ -11,6 +11,7 @@
 # - csv file export
 
 library(shiny)
+library(DT)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -33,7 +34,7 @@ ui <- fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      tableOutput("distPlot")
+      dataTableOutput("distPlot")
       # plotOutput("distPlot")
     )
   )
@@ -44,7 +45,9 @@ server <- function(input, output) {
   
   # output$disttable <- renderTable({faithful})
 
-  output$distPlot <- renderTable({faithful})
+  output$distPlot <- renderDataTable({
+    datatable(faithful)
+    })
   # output$distPlot <- renderPlot({
   #   # generate bins based on input$bins from ui.R
   #   x    <- faithful[, 2]
