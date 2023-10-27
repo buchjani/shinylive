@@ -17,7 +17,10 @@ ui <- fluidPage(
   
   # Application title
   titlePanel("Meine Shiny App via shinylive"),
-  
+  # titlePanel(fluidRow(column(11, htmlOutput('BT.title.dt1')),
+  #                     column(1,HTML("<a href='https://www.iqb.hu-berlin.de'>",
+  #                                   "<img src='iqb-logo.jpg', height=80, style = 'float:right;'/></a>")))),  
+
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
@@ -30,7 +33,8 @@ ui <- fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      plotOutput("distPlot")
+      tableOutput("distPlot")
+      # plotOutput("distPlot")
     )
   )
 )
@@ -38,16 +42,19 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  output$distPlot <- renderPlot({
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2]
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white',
-         xlab = 'Waiting time to next eruption (in mins)',
-         main = 'Histogram of waiting times')
-  })
+  # output$disttable <- renderTable({faithful})
+
+  output$distPlot <- renderTable({faithful})
+  # output$distPlot <- renderPlot({
+  #   # generate bins based on input$bins from ui.R
+  #   x    <- faithful[, 2]
+  #   bins <- seq(min(x), max(x), length.out = input$bins + 1)
+  # 
+  #   # draw the histogram with the specified number of bins
+  #   hist(x, breaks = bins, col = 'darkgray', border = 'white',
+  #        xlab = 'Waiting time to next eruption (in mins)',
+  #        main = 'Histogram of waiting times')
+  # })
 }
 
 # Run the application 
