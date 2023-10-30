@@ -27,4 +27,3 @@ shinylive::export(appdir = "myapp", destdir="docs")
 
 # check if it works locally:
 httpuv::runStaticServer("docs", port=8008)
- 

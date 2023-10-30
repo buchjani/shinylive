@@ -12,19 +12,51 @@
 
 library(shiny)
 library(DT)
+library(cranlogs)
+library(lubridate)
+library(dplyr)
+
+# test for one package
+cran_downloads(when = "last-week", packages = c("eatATA"))
+dl <- cran_downloads(when = "last-month", packages = c("eatATA")) 
+dl %>% 
+  mutate(Month=month(date)) %>% 
+  group_by(Month) %>% 
+  summarise(downloads=sum(count,na.rm=T)) %>% t()
+
+# loop across all eat Packages
+eat_packages <- c('eatATA', 'eatDB', 'eatGADS', 'eatRep', 'eatTools')
+eat_downloads <- NULL
+for (p in eat_packages){
+  dl <- cran_downloads(from = "2023-01-01", to = "last-day", packages = p) 
+  dl %>% 
+    mutate(Month=month(date)) %>% 
+    group_by(Month) %>% 
+    summarise(downloads=sum(count,na.rm=T)) %>% 
+    # pull(downloads) %>%
+    rename(!!p := downloads) %>%  
+    select(!!p) %>% 
+    t() %>% 
+    as.data.frame() %>% 
+    setNames(paste0(1:10, "/2023")) %>% 
+    mutate(`Gesamt 2023` = rowSums(across(where(is.numeric)))) %>% 
+    rbind.data.frame(eat_downloads) -> eat_downloads
+}
+
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Meine Shiny App via shinylive"),
-  # titlePanel(fluidRow(column(11, htmlOutput('BT.title.dt1')),
-  #                     column(1,HTML("<a href='https://www.iqb.hu-berlin.de'>",
-  #                                   "<img src='iqb-logo.jpg', height=80, style = 'float:right;'/></a>")))),  
+  # titlePanel("Meine Shiny App via shinylive"),
+  titlePanel(fluidRow(column(11, 'Meine Shiny App via shinylive'),
+                      column(1,HTML("<a href='https://www.iqb.hu-berlin.de'>",
+                                    "<img src='iqb-logo.jpg', height=80, style = 'float:right;'/></a>")))),
 
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
-    sidebarPanel(
+    sidebarPanel(width=2,
       sliderInput("bins",
                   "Number of bins:",
                   min = 1,
@@ -34,8 +66,8 @@ ui <- fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      dataTableOutput("distPlot")
-      # plotOutput("distPlot")
+      titlePanel('Downloadzahlen für die eat* Packages 2023'),
+      dataTableOutput("downloadTabelle")
     )
   )
 )
@@ -43,10 +75,13 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
+  src = "https://www.iqb.hu-berlin.de/system/img/logo_IQB.png"
+  output$picture<-renderText({c('<img src="',src,'">')})
+
   # output$disttable <- renderTable({faithful})
 
-  output$distPlot <- renderDataTable({
-    datatable(faithful)
+  output$downloadTabelle <- renderDataTable({
+    datatable(eat_downloads)
     })
   # output$distPlot <- renderPlot({
   #   # generate bins based on input$bins from ui.R
